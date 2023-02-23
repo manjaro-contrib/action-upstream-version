@@ -45,6 +45,7 @@ runs:
         for arch in x86_64 aarch64; do
           for branch in unstable testing stable; do
             url="https://search.manjaro-sway.download/?name=${{ inputs.name }}&branch=${branch}&arch=${arch}"
+            echo $url
             echo "${arch}_${branch}=$(curl -s $url | jq -r '.[0].version')" >>$GITHUB_OUTPUT
           done
         done
