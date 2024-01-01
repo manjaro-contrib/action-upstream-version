@@ -5,9 +5,6 @@ inputs:
   name:
     description: 'name of the package to check'
     required: true
-  version:
-    description: 'version to compare with upstream'
-    required: true
 
 outputs:
   aarch64_unstable:
@@ -28,12 +25,6 @@ outputs:
   x86_64_stable:
     description: the upstream version
     value: ${{ steps.info.outputs.x64_64_stable }}
-  branches_x86_64:
-    description: branches that need rebuild
-    value: ${{ steps.branches_x86_64.outputs.branches }}
-  branches_aarch64:
-    description: branches that need rebuild
-    value: ${{ steps.branches_aarch64.outputs.branches }}
 
 runs:
   using: "composite"
@@ -49,33 +40,3 @@ runs:
             echo "${arch}_${branch}=$(curl -s $url | jq -r '.version | sub(":";"__")')" >>$GITHUB_OUTPUT
           done
         done
-    - id: branches_x86_64
-      name: branches_x86_64
-      shell: bash
-      run: |
-        branches=()
-        [ "${{ steps.info.outputs.x86_64_stable }}" == "${{ inputs.version }}" ] && branches+=("\"stable\"")
-        [ "${{ steps.info.outputs.x86_64_testing }}" == "${{ inputs.version }}" ] && branches+=("\"testing\"")
-        [ "${{ steps.info.outputs.x86_64_unstable }}" == "${{ inputs.version }}" ] && branches+=("\"unstable\"")
-        printf -v joined '%s,' "${branches[@]}"
-        branches="${joined%,}"
-
-        echo $branches
-        if [ "${branches}" != "" ]; then
-          echo "branches=[${branches}]" >>$GITHUB_OUTPUT
-        fi
-    - id: branches_aarch64
-      name: branches_aarch64
-      shell: bash
-      run: |
-        branches=()
-        [ "${{ steps.info.outputs.aarch64_stable }}" == "${{ inputs.version }}" ] && branches+=("\"stable\"")
-        [ "${{ steps.info.outputs.aarch64_testing }}" == "${{ inputs.version }}" ] && branches+=("\"testing\"")
-        [ "${{ steps.info.outputs.aarch64_unstable }}" == "${{ inputs.version }}" ] && branches+=("\"unstable\"")
-        printf -v joined '%s,' "${branches[@]}"
-        branches="${joined%,}"
-
-        echo $branches
-        if [ "${branches}" != "" ]; then
-          echo "branches=[${branches}]" >>$GITHUB_OUTPUT
-        fi
